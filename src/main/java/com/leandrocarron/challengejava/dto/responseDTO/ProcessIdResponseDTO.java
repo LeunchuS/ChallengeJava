@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @Data
 public class ProcessIdResponseDTO {
     private Long processingId;
-    private String msg;
 }

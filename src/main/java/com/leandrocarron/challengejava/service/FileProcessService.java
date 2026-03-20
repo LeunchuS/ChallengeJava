@@ -51,7 +51,7 @@ public class FileProcessService {
             executor.submit(() -> produce(file, queue, consumers, processId));
             //now the consumers are used
             for (int i = 0; i < consumers; i++) {
-                executor.submit(createConsumer(queue, stats));
+                executor.submit(createConsumer(queue, stats, processId));
             }
             executor.shutdown();
             //threads needs to finish their excecutions before
@@ -77,7 +77,7 @@ public class FileProcessService {
         //csv needs 5 pieces: transactionId, accountId,amount,type,timestamp
         if (parts.length != 5) {
             log.warn("Transaction parsing - invalid line format: ", line);
-            throw new RuntimeException("Invalid line format");
+            //throw new RuntimeException("Invalid line format");
         }
         try {//it can be created using AllArgsConstructor
             Transaction transaction = new Transaction();
@@ -92,8 +92,9 @@ public class FileProcessService {
 
             return transaction;
         } catch (Exception e) {
-            log.error("Transaction parsing - error parsing line: {}. ", line , e);
-            throw new RuntimeException("Error parsing line: {}" + line, e);
+            log.error("Transaction parsing - error parsing line: {}", line);
+            return null;
+            //throw new RuntimeException("Error parsing line: {}" + line, e);
         }
     }
 
@@ -128,41 +129,40 @@ public class FileProcessService {
 
     //I'm trying to use producer separately
     private void produce(File file, BlockingQueue<String> queue, int consumers, long processId) {
+        log.info("idProcess {} - Producer starts filling the queue", processId);
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            //getting and updating process estatus
-            FileProcess fileProcess = new FileProcess();
-            fileProcess.setStatus(ProcessStatus.PROCESSING);
-            fileProcess.setFileProcessId(processId);
-            processRepository.save(fileProcess);
-
-            String line;
-
+            //Is the first line a header or null?
+            String line = reader.readLine();
+            if (line != null && !isHeader(line)) {
+                queue.put(line);
+            }
+            //Now everything left on the file is only data
             while ((line = reader.readLine()) != null) {
-                if (isHeader(line)) continue;
                 queue.put(line);
             }
             //consumer will stop when read this line
             for(int c = 0; c<consumers; c++)
                 queue.put("CONSUMER_STOP");
 
-            log.info("CSV file {}, idProcess {} - Queue created sucessfully",file.getName(), processId);
+            log.info("idProcess {} - Producer finishes filling queue. Total items {}",processId ,queue.size());
         } catch (Exception e) {
-            log.error("CSV file {}, idProcess {} - Queue failed",file.getName(), processId);
-            throw new RuntimeException(e);
+            log.error("idProcess {} - Queue failed", processId, e);
         }
     }
 
     //Here is where every string in queue is converted into instance and saved after that
-    private Runnable createConsumer(BlockingQueue<String> queue, ProcessStats stats) {
+    private Runnable createConsumer(BlockingQueue<String> queue, ProcessStats stats, Long processId) {
         return () -> {
+            log.info("processId {} - Consumer started taking items from queue");
             try {
                 while (true) {
                     String line = queue.take();
-                    //terminates consumer when queue is empty
+                    //terminates consumer when queue reach CONSUMER_STOP line
                     if ("CONSUMER_STOP".equals(line)) break;
                     processLine(line, stats);
 
                 }
+                log.info("processId {} - Consumer finished taking items from queue");
             } catch (InterruptedException e) {
                 log.error("Consumer Thread interrupted. ",e);
                 Thread.currentThread().interrupt();

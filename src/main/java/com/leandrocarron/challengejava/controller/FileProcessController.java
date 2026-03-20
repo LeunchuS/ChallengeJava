@@ -1,8 +1,9 @@
 package com.leandrocarron.challengejava.controller;
 
 import com.leandrocarron.challengejava.dto.responseDTO.ProcessIdResponseDTO;
+import com.leandrocarron.challengejava.exception.FileException;
+import com.leandrocarron.challengejava.exception.FileErrorType;
 import com.leandrocarron.challengejava.model.FileProcess;
-import com.leandrocarron.challengejava.model.ProcessStatus;
 import com.leandrocarron.challengejava.service.FileProcessService;
 //logs
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/fileProcess")
 public class FileProcessController {
-
+    private static final Logger log = LoggerFactory.getLogger(FileProcessController.class);
     private final FileProcessService fileProcessService;
 
     public FileProcessController(FileProcessService fileProcessService) {
@@ -27,27 +28,33 @@ public class FileProcessController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<ProcessIdResponseDTO> uploadCSV(@RequestParam("file") MultipartFile file) throws IOException {
-        //first step: verify if file is empty/null or has a diferent content than csv
+    public ResponseEntity<ProcessIdResponseDTO> uploadCSV(@RequestParam("file") MultipartFile file) {
+        //verify if uploaded file. not csv or empty
         if (file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest().body(new ProcessIdResponseDTO(null,"File is empty or missing"));
+            throw new FileException(FileErrorType.EMPTY_FILE,"El archivo está vacío o no fue enviado");
         }
-        if (!"text/csv".equalsIgnoreCase(file.getContentType())) {
-            return ResponseEntity.badRequest().body(new ProcessIdResponseDTO(null,"Invalid file type. It must be a csv file"));
+        if (!file.getOriginalFilename().endsWith(".csv")) {
+            throw new FileException(FileErrorType.INVALID_CONTENT, "Archivo con extensión incorrecta. Se requiere csv");
         }
         //a FileProcess is created and returning. PENDING STATE
         FileProcess process = fileProcessService.createFileProcess();
         //this is how I get de porcessId that I need to send in the response
         Long processId = process.getFileProcessId();
         //Save file content in a temporary file to prevent issues
-        File tempFile = File.createTempFile("upload-", ".csv");
-        file.transferTo(tempFile);
+        File tempFile;
+        try {
+            tempFile = File.createTempFile("upload-", ".csv");
+            file.transferTo(tempFile);
+            log.info(" processId {} - temporary copy of the file was created and save until the hole process ends");
+        } catch (IOException e) {
+            throw new FileException( FileErrorType.IO_ERROR,"El archivo no pudo guardarse en disco");
+        }
         //Now the content of the uploaded file is processed
         fileProcessService.processCSVAsync( tempFile, processId);
 
         return ResponseEntity
                 .accepted()
-                .body(new ProcessIdResponseDTO(processId, ProcessStatus.PENDING.toString()));
+                .body(new ProcessIdResponseDTO(processId));
     }
 
 

@@ -35,6 +35,7 @@ public class FileProcess {
         created_at = new Timestamp(System.currentTimeMillis());
     }
 
+
     public void updateStates(ProcessStats processStats){
         this.totalRecords = processStats.getTotal().get();
         this.processedRecords = processStats.getProcessed().get();
