@@ -4,7 +4,10 @@ import com.leandrocarron.challengejava.dto.responseDTO.ProcessIdResponseDTO;
 import com.leandrocarron.challengejava.model.FileProcess;
 import com.leandrocarron.challengejava.model.ProcessStatus;
 import com.leandrocarron.challengejava.service.FileProcessService;
-import com.leandrocarron.challengejava.service.ProcessStats;
+//logs
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+//
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +35,7 @@ public class FileProcessController {
         if (!"text/csv".equalsIgnoreCase(file.getContentType())) {
             return ResponseEntity.badRequest().body(new ProcessIdResponseDTO(null,"Invalid file type. It must be a csv file"));
         }
-        //a FileProcess is created and returning
+        //a FileProcess is created and returning. PENDING STATE
         FileProcess process = fileProcessService.createFileProcess();
         //this is how I get de porcessId that I need to send in the response
         Long processId = process.getFileProcessId();

@@ -7,10 +7,12 @@ import com.leandrocarron.challengejava.model.TransactionType;
 import com.leandrocarron.challengejava.repository.ProcessRepository;
 import com.leandrocarron.challengejava.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
+//logs
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+//--------
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -18,54 +20,55 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.concurrent.*;
 
 @Service
 @AllArgsConstructor
-@Data
 public class FileProcessService {
 
     private final ProcessRepository processRepository;
     private final TransactionRepository transactionRepository;
+    private static final Logger log = LoggerFactory.getLogger(FileProcessService.class);
 
 
     @Async("csvProcessorExecutor")
     public void processCSVAsync(File file, Long processId){
+        //get process to update atomic status
         FileProcess process = processRepository.findById(processId).orElseThrow();
-        //update FileProcess status
-        process.setStatus(ProcessStatus.PROCESSING);
-        processRepository.save(process);
-        //inicialize stats to save
-        ProcessStats stats = new ProcessStats(0,0,0,0);
-        //now the file processing starts
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-
-            //it'll represent a trasanction or record in the DB table
-            String line = reader.readLine();
-            //first line is a header?
-            if (!isHeader(line)) {
-                processLine(line, stats);
+        ProcessStats stats = new ProcessStats();
+        try {
+            //queue for producer consumer pattern
+            LinkedBlockingDeque queue = new LinkedBlockingDeque<>();
+            process.setStatus(ProcessStatus.PROCESSING);
+            processRepository.save(process);
+            log.info("CSV file {} - processing started. processId: {}", file.getName(), processId);
+            //number of consumers
+            int consumers = 4;
+            //Creates a pool with threat that can be reused
+            ExecutorService executor = Executors.newFixedThreadPool(consumers + 1);
+            //put the task to execute. I send processId and not FileProcess to avoid errors
+            executor.submit(() -> produce(file, queue, consumers, processId));
+            //now the consumers are used
+            for (int i = 0; i < consumers; i++) {
+                executor.submit(createConsumer(queue, stats));
             }
-
-            while ((line = reader.readLine()) != null) {
-                processLine(line, stats);
-            }
-
+            executor.shutdown();
+            //threads needs to finish their excecutions before
+            executor.awaitTermination(1, TimeUnit.HOURS);
+            //delete the file after processes it
+            if (file.exists()) file.delete();
+            log.info("CSV file {}, processId {} - processing COMPLETED", file.getName(), processId);
             process.setStatus(ProcessStatus.COMPLETED);
-
         } catch (Exception e) {
+            log.error("CSV file {}, processId {} - processing FAILED ",file.getName(),processId,e);
             process.setStatus(ProcessStatus.FAILED);
         } finally {
-            //delete the file
-            if (file.exists()) {
-                file.delete();
-            }
+            process.updateStates(stats);
+            log.info("CSV file {}, processId {} - STATS total= {}, processed= {}, error= {}, duplicated= {}", file.getName(),processId, stats.getTotal(),stats.getProcessed(),stats.getErrors(),stats.getDuplicated());
+            processRepository.save(process);
+            if (file.exists()) file.delete();
         }
-        //if
-        process.setStats(stats);
-
-        processRepository.save(process);
     }
 
     private Transaction mapToTransaction(String line) {
@@ -73,6 +76,7 @@ public class FileProcessService {
         String[] parts = line.split(",");
         //csv needs 5 pieces: transactionId, accountId,amount,type,timestamp
         if (parts.length != 5) {
+            log.warn("Transaction parsing - invalid line format: ", line);
             throw new RuntimeException("Invalid line format");
         }
         try {//it can be created using AllArgsConstructor
@@ -88,7 +92,8 @@ public class FileProcessService {
 
             return transaction;
         } catch (Exception e) {
-            throw new RuntimeException("Error parsing line: " + line, e);
+            log.error("Transaction parsing - error parsing line: {}. ", line , e);
+            throw new RuntimeException("Error parsing line: {}" + line, e);
         }
     }
 
@@ -99,23 +104,69 @@ public class FileProcessService {
     }
 
     private void processLine(String line, ProcessStats stats){
-        stats.setTotal(stats.getTotal()+1);
+        stats.incrementTotal();
         try {
             Transaction transaction = mapToTransaction(line);
             //new iteration after finding a duplicated id
             if (transactionRepository.existsById(transaction.getTransactionId())) {
-                stats.setDuplicated(stats.getDuplicated()+1);
+                log.warn("Transaction parsing - duplicated id {}", transaction.getTransactionId());
+                stats.incrementDuplicated();
                 return;
             }
             transactionRepository.save(transaction);
-            stats.setProcessed(stats.getProcessed()+1);
+            stats.incrementProcessed();
         } catch (Exception e) {
-            stats.setErrors(stats.getErrors()+1);
+            log.error("Transaction parsing - Something went wrong: ",e);
+            stats.incrementError();
         }
     }
 
     //To avoid errors trying to create a Transaction with header data.
     public boolean isHeader(String line){
         return (line.toUpperCase()).contains("transactionId".toUpperCase());
+    }
+
+    //I'm trying to use producer separately
+    private void produce(File file, BlockingQueue<String> queue, int consumers, long processId) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            //getting and updating process estatus
+            FileProcess fileProcess = new FileProcess();
+            fileProcess.setStatus(ProcessStatus.PROCESSING);
+            fileProcess.setFileProcessId(processId);
+            processRepository.save(fileProcess);
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                if (isHeader(line)) continue;
+                queue.put(line);
+            }
+            //consumer will stop when read this line
+            for(int c = 0; c<consumers; c++)
+                queue.put("CONSUMER_STOP");
+
+            log.info("CSV file {}, idProcess {} - Queue created sucessfully",file.getName(), processId);
+        } catch (Exception e) {
+            log.error("CSV file {}, idProcess {} - Queue failed",file.getName(), processId);
+            throw new RuntimeException(e);
+        }
+    }
+
+    //Here is where every string in queue is converted into instance and saved after that
+    private Runnable createConsumer(BlockingQueue<String> queue, ProcessStats stats) {
+        return () -> {
+            try {
+                while (true) {
+                    String line = queue.take();
+                    //terminates consumer when queue is empty
+                    if ("CONSUMER_STOP".equals(line)) break;
+                    processLine(line, stats);
+
+                }
+            } catch (InterruptedException e) {
+                log.error("Consumer Thread interrupted. ",e);
+                Thread.currentThread().interrupt();
+            }
+        };
     }
 }

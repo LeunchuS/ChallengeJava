@@ -18,11 +18,11 @@ public class FileProcess {
     //Using H2 it's necesary to create the secuence in schema.sql
     @SequenceGenerator(name = "process_seq", sequenceName = "PROCESS_SEQ", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "process_seq")
-    private long fileProcessId;
-    private long totalRecords;
-    private long processedRecords;
-    private long errorRecords;
-    private long duplicatedRecords;
+    private Long fileProcessId;
+    private Long totalRecords;
+    private Long processedRecords;
+    private Long errorRecords;
+    private Long duplicatedRecords;
     private Timestamp created_at;
     private ProcessStatus status;
 
@@ -35,10 +35,11 @@ public class FileProcess {
         created_at = new Timestamp(System.currentTimeMillis());
     }
 
-    public void setStats(ProcessStats stats){
-        this.totalRecords = stats.getTotal();
-        this.processedRecords = stats.getProcessed();
-        this.errorRecords = stats.getErrors();
-        this.duplicatedRecords = stats.getDuplicated();
+    public void updateStates(ProcessStats processStats){
+        this.totalRecords = processStats.getTotal().get();
+        this.processedRecords = processStats.getProcessed().get();
+        this.errorRecords = processStats.getErrors().get();
+        this.duplicatedRecords = processStats.getDuplicated().get();
     }
+
 }
