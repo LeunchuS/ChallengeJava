@@ -17,4 +17,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
       @Query("SELECT t.accountId as accountId, count(t.transactionId) as processed FROM Transaction t GROUP BY t.accountId ORDER BY count(t.transactionId) DESC")
       List<Ranked> getRanking(Pageable pageable);
 
+
+      boolean existsByAccountId(Long accountId);
 }

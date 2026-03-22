@@ -15,7 +15,7 @@ public class ProcessResponseDTO {
     private Long processed;
     private Long error;
 
-    public void PrepareDTO(FileProcess fileProcess){
+    public void prepareDTO(FileProcess fileProcess){
         this.processStatus = fileProcess.getStatus();
         this.total = fileProcess.getTotalRecords();
         this.processed = fileProcess.getProcessedRecords();

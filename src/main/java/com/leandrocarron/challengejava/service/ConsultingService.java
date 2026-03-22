@@ -4,8 +4,6 @@ import com.leandrocarron.challengejava.dto.responseDTO.AccountBalanceResponseDTO
 import com.leandrocarron.challengejava.dto.responseDTO.ProcessResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.Ranked;
 import com.leandrocarron.challengejava.dto.responseDTO.RankingResponseDTO;
-import com.leandrocarron.challengejava.exception.FileErrorType;
-import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.model.FileProcess;
 import com.leandrocarron.challengejava.repository.ProcessRepository;
 import com.leandrocarron.challengejava.repository.TransactionRepository;
@@ -35,13 +33,15 @@ public class ConsultingService {
             return null;
         }
         ProcessResponseDTO processResponseDTO = new ProcessResponseDTO();
-        processResponseDTO.PrepareDTO(fileProcess);
+        processResponseDTO.prepareDTO(fileProcess);
         return processResponseDTO;
     }
 
     public AccountBalanceResponseDTO getAccountBalance(long accountId){
-         BigDecimal amount = transactionRepository.sumAmountByAccountId(accountId);
-         return (new AccountBalanceResponseDTO(accountId, amount));
+        if (!transactionRepository.existsByAccountId(accountId))
+             return null;
+        BigDecimal amount = transactionRepository.sumAmountByAccountId(accountId);
+        return (new AccountBalanceResponseDTO(accountId, amount));
     }
 
     public RankingResponseDTO getRanking(){

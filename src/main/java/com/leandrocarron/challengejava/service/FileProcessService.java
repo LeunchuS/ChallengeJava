@@ -94,7 +94,6 @@ public class FileProcessService {
         } catch (Exception e) {
             log.error("Transaction parsing - error parsing line: {}", line);
             return null;
-            //throw new RuntimeException("Error parsing line: {}" + line, e);
         }
     }
 

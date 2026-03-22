@@ -1,7 +1,8 @@
 package com.leandrocarron.challengejava.exception;
 
-import com.leandrocarron.challengejava.dto.Error.ErrorResponseDTO;
+import com.leandrocarron.challengejava.dto.ErrorDTO.ErrorResponseDTO;
 //for loggin
+import io.swagger.v3.oas.annotations.Hidden;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
+@Hidden
 @RestControllerAdvice
 public class ExceptionsHandler {
     private static final Logger log = LoggerFactory.getLogger(ExceptionsHandler.class);
@@ -32,7 +33,6 @@ public class ExceptionsHandler {
                 .body(new ErrorResponseDTO(e.getMessage(),e.getFileErrorType().toString()));
     }
 
-
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(Exception e) {
         log.warn("Param error", e);
@@ -45,13 +45,9 @@ public class ExceptionsHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGenericException(Exception e) {
         log.error("Unexpected error occurred", e);
-        ErrorResponseDTO error = new ErrorResponseDTO(
-                "Unexpected error occurred",
-                "INTERNAL_ERROR"
-        );
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(error);
+                .body(new ErrorResponseDTO("Unexpected error occurred","INTERNAL_ERROR"));
     }
 }
