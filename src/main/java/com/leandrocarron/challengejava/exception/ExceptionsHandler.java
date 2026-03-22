@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class ExceptionsHandler {
@@ -21,7 +22,7 @@ public class ExceptionsHandler {
     public ResponseEntity<ErrorResponseDTO> handleDatabaseError(DataAccessException e) {
         log.error("Database error", e);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(new ErrorResponseDTO("Database unavailable", "DB_ERROR"));
+                .body(new ErrorResponseDTO("Database error", "DB_ERROR"));
     }
 
     @ExceptionHandler(FileException.class)
@@ -29,6 +30,14 @@ public class ExceptionsHandler {
         log.warn("Uploaded file error", e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO(e.getMessage(),e.getFileErrorType().toString()));
+    }
+
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(Exception e) {
+        log.warn("Param error", e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDTO("Param error","PARAM ERROR"));
     }
 
 

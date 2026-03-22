@@ -4,10 +4,14 @@ import com.leandrocarron.challengejava.dto.responseDTO.AccountBalanceResponseDTO
 import com.leandrocarron.challengejava.dto.responseDTO.ProcessResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.Ranked;
 import com.leandrocarron.challengejava.dto.responseDTO.RankingResponseDTO;
+import com.leandrocarron.challengejava.exception.FileErrorType;
+import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.model.FileProcess;
 import com.leandrocarron.challengejava.repository.ProcessRepository;
 import com.leandrocarron.challengejava.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +25,15 @@ public class ConsultingService {
 
     private final ProcessRepository processRepository;
     private final TransactionRepository transactionRepository;
+    private static final Logger log = LoggerFactory.getLogger(FileProcessService.class);
 
     public ProcessResponseDTO getProcessInfo(long processingId){
-        FileProcess fileProcess = processRepository.getReferenceById(processingId);
+        //If procesId doesn't exist it returns an ErrorResponseDTO
+        FileProcess fileProcess = processRepository.findById(processingId).orElse(null);
+        if (fileProcess == null) {
+            log.info("processingId " +processingId+ " not exist or something else went wrong");
+            return null;
+        }
         ProcessResponseDTO processResponseDTO = new ProcessResponseDTO();
         processResponseDTO.PrepareDTO(fileProcess);
         return processResponseDTO;

@@ -6,4 +6,5 @@ public enum FileErrorType {
     FILE_TOO_LARGE,
     INVALID_CONTENT,
     IO_ERROR,
+    INVALID_ID,
 }

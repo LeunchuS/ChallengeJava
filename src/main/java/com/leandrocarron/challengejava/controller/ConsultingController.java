@@ -1,18 +1,14 @@
 package com.leandrocarron.challengejava.controller;
 
-import com.leandrocarron.challengejava.dto.requestDTO.AccountBalanceRequestDTO;
-import com.leandrocarron.challengejava.dto.requestDTO.DuplicatedRequestDTO;
-import com.leandrocarron.challengejava.dto.requestDTO.ProcessRequestDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.AccountBalanceResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.DuplicatedRespopnseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.ProcessResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.RankingResponseDTO;
+import com.leandrocarron.challengejava.exception.FileErrorType;
+import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.repository.TransactionRepository;
 import com.leandrocarron.challengejava.service.ConsultingService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/consulting")
@@ -25,15 +21,17 @@ public class ConsultingController {
     }
 
 
-    @GetMapping("/processing")
-    public ProcessResponseDTO GetProcessInfo(@RequestBody ProcessRequestDTO processRequestDTO){
-        ProcessResponseDTO processResponseDTO = consultingService.getProcessInfo(processRequestDTO.getProcessingId());
+    @GetMapping("/processing/{processingId}")
+    public ProcessResponseDTO GetProcessInfo(@PathVariable Long processingId){
+        ProcessResponseDTO processResponseDTO = consultingService.getProcessInfo(processingId);
+        if(processResponseDTO == null)
+            throw new FileException(FileErrorType.INVALID_ID,"Invalid processingId " + processingId);
         return processResponseDTO;
     }
 
-    @GetMapping("/accountBalance")
-    public AccountBalanceResponseDTO GetAccountBalance(@RequestBody AccountBalanceRequestDTO accountBalanceRequestDTO){
-        AccountBalanceResponseDTO accountBalanceResponseDTO = consultingService.getAccountBalance(accountBalanceRequestDTO.getAccountId());
+    @GetMapping("/accountBalance/{accountId}")
+    public AccountBalanceResponseDTO GetAccountBalance(@PathVariable Long accountId){
+        AccountBalanceResponseDTO accountBalanceResponseDTO = consultingService.getAccountBalance(accountId);
         return accountBalanceResponseDTO;
     }
 
@@ -43,12 +41,12 @@ public class ConsultingController {
         return rankingResponseDTO;
     }
 
-    @GetMapping("/duplicated")
-    public DuplicatedRespopnseDTO isDuplicated(@RequestBody DuplicatedRequestDTO duplicatedRequestDTO){
-        boolean transaction = consultingService.getById(duplicatedRequestDTO.getTransactionId());
+    @GetMapping("/duplicated/{transactionId}")
+    public DuplicatedRespopnseDTO isDuplicated(@PathVariable Long transactionId){
+        boolean transaction = consultingService.getById(transactionId);
 
         DuplicatedRespopnseDTO duplicatedRespopnseDTO = new DuplicatedRespopnseDTO(
-                duplicatedRequestDTO.getTransactionId(), !transaction,
+                transactionId, !transaction,
                 "transactionId is"+ (transaction?" not ":" ")+ "duplicated");
         return duplicatedRespopnseDTO;
 

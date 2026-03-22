@@ -4,6 +4,7 @@ import com.leandrocarron.challengejava.dto.responseDTO.ProcessIdResponseDTO;
 import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.exception.FileErrorType;
 import com.leandrocarron.challengejava.model.FileProcess;
+import com.leandrocarron.challengejava.model.ProcessStatus;
 import com.leandrocarron.challengejava.service.FileProcessService;
 //logs
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class FileProcessController {
     }
 
     @PostMapping("/upload")
+
     public ResponseEntity<ProcessIdResponseDTO> uploadCSV(@RequestParam("file") MultipartFile file) {
         //verify if uploaded file. not csv or empty
         if (file == null || file.isEmpty()) {
@@ -50,6 +52,9 @@ public class FileProcessController {
             throw new FileException( FileErrorType.IO_ERROR,"El archivo no pudo guardarse en disco");
         }
         //Now the content of the uploaded file is processed
+        ProcessStatus processStatus= ProcessStatus.FAILED;
+        process.setStatus(processStatus);
+        fileProcessService.saveProcess(process);
         fileProcessService.processCSVAsync( tempFile, processId);
 
         return ResponseEntity

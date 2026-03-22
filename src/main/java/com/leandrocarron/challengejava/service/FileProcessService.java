@@ -169,4 +169,8 @@ public class FileProcessService {
             }
         };
     }
+
+    public void saveProcess(FileProcess fileProcess){
+        processRepository.save(fileProcess);
+    }
 }
