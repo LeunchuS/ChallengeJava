@@ -50,7 +50,7 @@ public class ConsultingService {
        return rankingResponseDTO;
     }
 
-    public boolean getById(Long transactionId){
-        return transactionRepository.findById(transactionId).isEmpty();
+    public boolean isDuplicated(Long transactionId){
+        return !transactionRepository.findById(transactionId).isEmpty();
     }
 }

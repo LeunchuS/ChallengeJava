@@ -1,10 +1,8 @@
 package com.leandrocarron.challengejava.controller;
 
+import com.leandrocarron.challengejava.config.DefaultApiResponses;
 import com.leandrocarron.challengejava.dto.ErrorDTO.ErrorResponseDTO;
-import com.leandrocarron.challengejava.dto.responseDTO.AccountBalanceResponseDTO;
-import com.leandrocarron.challengejava.dto.responseDTO.DuplicatedResponseDTO;
-import com.leandrocarron.challengejava.dto.responseDTO.ProcessResponseDTO;
-import com.leandrocarron.challengejava.dto.responseDTO.RankingResponseDTO;
+import com.leandrocarron.challengejava.dto.responseDTO.*;
 import com.leandrocarron.challengejava.exception.FileErrorType;
 import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.repository.TransactionRepository;
@@ -30,9 +28,13 @@ public class ConsultingController {
     }
 
     @Operation(
-            summary = "Informa sobre un proceso de carga de csv",
-            description = "Devuelve el estado del proceso y las estadisticas. Los datos numéricos se actualizan al finalizar"
+            summary = "Obtiene información de un proceso de carga",
+            description = "Devuelve el estado actual del proceso de carga de un archivo CSV. Los valores estadísticos se actualizan una vez que el proceso finaliza.",
+            responses = {@ApiResponse(responseCode = "200",description = "Proceso encontrado",
+                            content = @Content(schema = @Schema(implementation = ProcessResponseDTO.class)))
+            }
     )
+    @DefaultApiResponses
     @GetMapping("/processing/{processingId}")
     public ProcessResponseDTO GetProcessInfo(@PathVariable Long processingId){
         ProcessResponseDTO processResponseDTO = consultingService.getProcessInfo(processingId);
@@ -43,8 +45,13 @@ public class ConsultingController {
 
     @Operation(
             summary = "Suma los montos de las transacciones de una cuenta",
-            description = "Si la cuenta existe devuelve el monto, si no existe devuelve una respuesta de error"
+            description = "Si la cuenta existe devuelve el monto, si no existe devuelve un ErrorResponseDTO",
+            responses = {
+                    @ApiResponse(responseCode = "200",description = "Balance obtenido correctamente",
+                                content = @Content(schema = @Schema(implementation = AccountBalanceResponseDTO.class)))
+            }
     )
+    @DefaultApiResponses
     @GetMapping("/accountBalance/{accountId}")
     public AccountBalanceResponseDTO GetAccountBalance(@PathVariable Long accountId){
         AccountBalanceResponseDTO accountBalanceResponseDTO = consultingService.getAccountBalance(accountId);
@@ -54,9 +61,14 @@ public class ConsultingController {
     }
 
     @Operation(
-            summary = "Cuentas con más transacciones",
-            description = "Devuelve las primeras diez cuentas con más transacciones"
+            summary = "Ranking de cuentas por cantidad de transacciones",
+            description = "Devuelve las 10 cuentas con mayor cantidad de transacciones registradas en el sistema.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Ranking obtenido correctamente",
+                            content = @Content(schema = @Schema(implementation = RankingResponseDTO.class)))
+            }
     )
+    @DefaultApiResponses
     @GetMapping("/ranking")
     public RankingResponseDTO GetRankinByAccount(){
         RankingResponseDTO rankingResponseDTO = consultingService.getRanking();
@@ -64,17 +76,21 @@ public class ConsultingController {
     }
 
     @Operation(
-            summary = "Valida si ya existe una transacción",
-            description = "Si el id de la transacción existe devuelve true, si no existe devuelve false"
+            summary = "Verifica si una transacción está duplicada",
+            description = "Indica si una transacción ya existe en el sistema. Retorna true si no existe y false si ya existe.",
+            responses = {
+                    @ApiResponse(responseCode = "200",description = "Consulta exitosa",
+                            content = @Content(schema = @Schema(implementation = DuplicatedResponseDTO.class)))
+            }
     )
+    @DefaultApiResponses
     @GetMapping("/duplicated/{transactionId}")
     public DuplicatedResponseDTO isDuplicated(@PathVariable Long transactionId){
-        boolean transaction = consultingService.getById(transactionId);
+        boolean transaction = consultingService.isDuplicated(transactionId);
 
         DuplicatedResponseDTO duplicatedResponseDTO = new DuplicatedResponseDTO(
-                transactionId, !transaction,
-                "transactionId is"+ (transaction?" not ":" ")+ "duplicated");
+                transactionId, transaction,
+                "transactionId is"+ (transaction?" ":" not ")+ "duplicated");
         return duplicatedResponseDTO;
-
     }
 }

@@ -7,4 +7,5 @@ public enum FileErrorType {
     INVALID_CONTENT,
     IO_ERROR,
     INVALID_ID,
+    NOT_FOUND,
 }

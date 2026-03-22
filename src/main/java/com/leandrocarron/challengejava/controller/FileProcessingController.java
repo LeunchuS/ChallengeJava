@@ -1,8 +1,10 @@
 package com.leandrocarron.challengejava.controller;
 
+import com.leandrocarron.challengejava.config.DefaultApiResponses;
 import com.leandrocarron.challengejava.dto.ErrorDTO.ErrorResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.AccountBalanceResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.ProcessIdResponseDTO;
+import com.leandrocarron.challengejava.dto.responseDTO.ProcessResponseDTO;
 import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.exception.FileErrorType;
 import com.leandrocarron.challengejava.model.FileProcess;
@@ -39,25 +41,21 @@ public class FileProcessingController {
         this.fileProcessService = fileProcessService;
     }
 
-    @PostMapping(value="/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
     //operations makes that swagger-ui schemes shows DataResponseErrorDTO like default
     @Operation(
             summary = "Carga un archivo csv para procesarlo, convertirlo en transacciones y almacenarlas",
             description = "Retorna el processingId generado",
-           responses = {
-                    @ApiResponse(
-                            responseCode = "202",
-                            description = "OK",
-                            content = @Content(
-                                    schema = @Schema(implementation = ProcessIdResponseDTO.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            content = @Content(
-                                    schema = @Schema(implementation = ErrorResponseDTO.class)
-                            )
+            responses = {
+                    @ApiResponse(responseCode = "202",description = "Requerimiento aceptado",
+                            content = @Content(schema = @Schema(implementation = ProcessIdResponseDTO.class))),
+                    @ApiResponse(responseCode = "503",description = "Base de datos no disponible",
+                            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))
                     )
-            })
+            }
+            )
+    @DefaultApiResponses
+    @PostMapping(value="/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //parameters allows upload csv on swagger like string
     public ResponseEntity<ProcessIdResponseDTO> uploadCSV(@Parameter(description = "Archivo CSV", required = true,
             content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,

@@ -103,10 +103,16 @@ public class FileProcessService {
             return processRepository.save(process);
     }
 
-    private void processLine(String line, ProcessStats stats){
+    private void processLine(String line, ProcessStats stats, Long processId){
         stats.incrementTotal();
         try {
             Transaction transaction = mapToTransaction(line);
+            //if something went wrong
+            if (transaction == null) {
+                log.error("processId {} - Transaction parsing error, line: {}", processId,line);
+                stats.incrementError();
+                return; // 👈 CLAVE
+            }
             //new iteration after finding a duplicated id
             if (transactionRepository.existsById(transaction.getTransactionId())) {
                 log.warn("Transaction parsing - duplicated id {}", transaction.getTransactionId());
@@ -116,7 +122,7 @@ public class FileProcessService {
             transactionRepository.save(transaction);
             stats.incrementProcessed();
         } catch (Exception e) {
-            log.error("Transaction parsing - Something went wrong: ",e);
+            log.error("processId {} - Transaction parsing error, line: {}", processId,line);
             stats.incrementError();
         }
     }
@@ -152,16 +158,16 @@ public class FileProcessService {
     //Here is where every string in queue is converted into instance and saved after that
     private Runnable createConsumer(BlockingQueue<String> queue, ProcessStats stats, Long processId) {
         return () -> {
-            log.info("processId {} - Consumer started taking items from queue");
+            log.info("processId {} - Consumer started taking items from queue", processId);
             try {
                 while (true) {
                     String line = queue.take();
                     //terminates consumer when queue reach CONSUMER_STOP line
                     if ("CONSUMER_STOP".equals(line)) break;
-                    processLine(line, stats);
+                    processLine(line, stats, processId);
 
                 }
-                log.info("processId {} - Consumer finished taking items from queue");
+                log.info("processId {} - Consumer finished taking items from queue", processId);
             } catch (InterruptedException e) {
                 log.error("Consumer Thread interrupted. ",e);
                 Thread.currentThread().interrupt();
