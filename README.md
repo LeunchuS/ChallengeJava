@@ -59,7 +59,7 @@ Para utilizarlo:
 2. Dirigirse a la sección **File Processing**
 3. Seleccionar el endpoint `/fileProcess/upload`
 4. Hacer click en **Try it out**, habilitando así el botón de carga.
-5. Cargar uno de los archivos provistos de muestra.
+5. Cargar uno de los archivos de muestra alojados en el directorio **/data**.
 6. Ejecutar la request con el boton azul **Execute**
 7. Verificar resultado en **Responses**
 
