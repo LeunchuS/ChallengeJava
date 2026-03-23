@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.rmi.UnexpectedException;
+
 @Hidden
 @RestControllerAdvice
 public class ExceptionsHandler {
@@ -28,13 +31,21 @@ public class ExceptionsHandler {
 
     @ExceptionHandler(FileException.class)
     public ResponseEntity<ErrorResponseDTO> handleFileErrors(FileException e){
-        log.warn("Uploaded file error", e);
+        log.warn("File consulting error", e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO(e.getMessage(),e.getFileErrorType().toString()));
     }
 
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ErrorResponseDTO> handleFileErrors(FileUploadException e){
+        log.warn("File uploading error", e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDTO(e.getMessage(),e.getFileErrorType().toString()));
+    }
+
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(Exception e) {
+    public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         log.warn("Param error", e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO("Param error","PARAM ERROR"));
@@ -50,4 +61,6 @@ public class ExceptionsHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponseDTO("Unexpected error occurred","INTERNAL_ERROR"));
     }
+
+
 }

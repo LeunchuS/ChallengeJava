@@ -7,6 +7,7 @@ import com.leandrocarron.challengejava.dto.responseDTO.ProcessIdResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.ProcessResponseDTO;
 import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.exception.FileErrorType;
+import com.leandrocarron.challengejava.exception.FileUploadException;
 import com.leandrocarron.challengejava.model.FileProcess;
 import com.leandrocarron.challengejava.model.ProcessStatus;
 import com.leandrocarron.challengejava.service.FileProcessService;
@@ -62,10 +63,10 @@ public class FileProcessingController {
                     schema = @Schema(type = "string", format = "binary"))) @RequestParam("file") MultipartFile file) {
         //verify if uploaded file. not csv or empty
         if (file == null || file.isEmpty()) {
-            throw new FileException(FileErrorType.EMPTY_FILE,"El archivo está vacío o no fue enviado");
+            throw new FileUploadException(FileErrorType.EMPTY_FILE,"El archivo está vacío o no fue enviado");
         }
         if (!file.getOriginalFilename().endsWith(".csv")) {
-            throw new FileException(FileErrorType.INVALID_CONTENT, "Archivo con extensión incorrecta. Se requiere csv");
+            throw new FileUploadException(FileErrorType.INVALID_CONTENT, "Archivo con extensión incorrecta. Se requiere csv");
         }
         //a FileProcess is created and returning. PENDING STATE
         FileProcess process = fileProcessService.createFileProcess();
@@ -78,7 +79,7 @@ public class FileProcessingController {
             file.transferTo(tempFile);
             log.info(" processId {} - temporary copy of the file was created and save until the hole process ends");
         } catch (IOException e) {
-            throw new FileException( FileErrorType.IO_ERROR,"El archivo no pudo guardarse en disco");
+            throw new FileUploadException( FileErrorType.IO_ERROR,"El archivo no pudo guardarse en disco");
         }
         //Now the content of the uploaded file is processed
         ProcessStatus processStatus= ProcessStatus.FAILED;

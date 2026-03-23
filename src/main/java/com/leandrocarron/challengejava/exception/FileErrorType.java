@@ -8,4 +8,5 @@ public enum FileErrorType {
     IO_ERROR,
     INVALID_ID,
     NOT_FOUND,
+    UPLOAD_ERROR
 }
