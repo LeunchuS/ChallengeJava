@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.leandrocarron.challengejava.ChallenjeJavaApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-03-22T04:21:47.102Z" hostname="DESKTOP-FTHAT9N" time="10.76">
+<testsuite name="com.leandrocarron.challengejava.ChallenjeJavaApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-04-06T21:54:27.528Z" hostname="DESKTOP-FTHAT9N" time="11.474">
   <properties/>
-  <testcase name="contextLoads()" classname="com.leandrocarron.challengejava.ChallenjeJavaApplicationTests" time="0.625"/>
-  <system-out><![CDATA[01:21:47.428 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.leandrocarron.challengejava.ChallenjeJavaApplicationTests]: ChallenjeJavaApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-01:21:47.599 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.leandrocarron.challengejava.ChallenjeJavaApplication for test class com.leandrocarron.challengejava.ChallenjeJavaApplicationTests
+  <testcase name="contextLoads()" classname="com.leandrocarron.challengejava.ChallenjeJavaApplicationTests" time="0.911"/>
+  <system-out><![CDATA[18:54:27.851 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.leandrocarron.challengejava.ChallenjeJavaApplicationTests]: ChallenjeJavaApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:54:28.105 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.leandrocarron.challengejava.ChallenjeJavaApplication for test class com.leandrocarron.challengejava.ChallenjeJavaApplicationTests
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -14,18 +14,18 @@
 
  :: Spring Boot ::                (v4.0.3)
 
-2026-03-22T01:21:48.371-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] c.l.c.ChallenjeJavaApplicationTests      : Starting ChallenjeJavaApplicationTests using Java 17.0.17 with PID 15416 (started by leand in C:\Users\leand\IdeaProjects\ChallenjeJava)
-2026-03-22T01:21:48.371-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] c.l.c.ChallenjeJavaApplicationTests      : No active profile set, falling back to 1 default profile: "default"
-2026-03-22T01:21:49.742-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-03-22T01:21:49.835-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 81 ms. Found 2 JPA repository interfaces.
-2026-03-22T01:21:50.463-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-03-22T01:21:50.793-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
-2026-03-22T01:21:50.809-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-03-22T01:21:51.022-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
-2026-03-22T01:21:51.169-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
-2026-03-22T01:21:52.197-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-03-22T01:21:52.291-03:00  WARN 15416 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-03-22T01:21:52.319-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2026-04-06T18:54:28.845-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] c.l.c.ChallenjeJavaApplicationTests      : Starting ChallenjeJavaApplicationTests using Java 17.0.17 with PID 1396 (started by leand in C:\Users\leand\IdeaProjects\ChallenjeJava)
+2026-04-06T18:54:28.845-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] c.l.c.ChallenjeJavaApplicationTests      : No active profile set, falling back to 1 default profile: "default"
+2026-04-06T18:54:30.263-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-06T18:54:30.372-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 91 ms. Found 2 JPA repository interfaces.
+2026-04-06T18:54:31.023-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-06T18:54:31.388-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-04-06T18:54:31.406-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-06T18:54:31.645-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-06T18:54:31.775-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-04-06T18:54:32.821-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-06T18:54:32.914-03:00  WARN 1396 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-06T18:54:32.946-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [jdbc:h2:mem:testdb]
 	Database driver: H2 JDBC Driver
 	Database dialect: H2Dialect
@@ -37,12 +37,12 @@
 	Pool: DataSourceConnectionProvider
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2026-03-22T01:21:53.897-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-03-22T01:21:53.912-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-03-22T01:21:54.053-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-03-22T01:21:56.069-03:00  WARN 15416 --- [ChallenjeJava] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-03-22T01:21:56.959-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
-2026-03-22T01:21:57.219-03:00  INFO 15416 --- [ChallenjeJava] [    Test worker] c.l.c.ChallenjeJavaApplicationTests      : Started ChallenjeJavaApplicationTests in 9.337 seconds (process running for 11.741)
+2026-04-06T18:54:34.641-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-06T18:54:34.657-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-06T18:54:34.817-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-06T18:54:36.949-03:00  WARN 1396 --- [ChallenjeJava] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-06T18:54:37.775-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2026-04-06T18:54:38.045-03:00  INFO 1396 --- [ChallenjeJava] [    Test worker] c.l.c.ChallenjeJavaApplicationTests      : Started ChallenjeJavaApplicationTests in 9.642 seconds (process running for 12.661)
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

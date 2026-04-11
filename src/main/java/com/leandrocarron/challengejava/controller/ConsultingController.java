@@ -1,7 +1,6 @@
 package com.leandrocarron.challengejava.controller;
 
 import com.leandrocarron.challengejava.config.DefaultApiResponses;
-import com.leandrocarron.challengejava.dto.ErrorDTO.ErrorResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.*;
 import com.leandrocarron.challengejava.exception.FileErrorType;
 import com.leandrocarron.challengejava.exception.FileException;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +37,7 @@ public class ConsultingController {
     public ProcessResponseDTO GetProcessInfo(@PathVariable Long processingId){
         ProcessResponseDTO processResponseDTO = consultingService.getProcessInfo(processingId);
         if(processResponseDTO == null)
-            throw new FileException(FileErrorType.INVALID_ID,"Invalid processingId " + processingId);
+            throw new FileException(FileErrorType.NOT_FOUND,"Invalid processingId " + processingId);
         return processResponseDTO;
     }
 
@@ -55,8 +53,6 @@ public class ConsultingController {
     @GetMapping("/accountBalance/{accountId}")
     public AccountBalanceResponseDTO GetAccountBalance(@PathVariable Long accountId){
         AccountBalanceResponseDTO accountBalanceResponseDTO = consultingService.getAccountBalance(accountId);
-        if(accountBalanceResponseDTO==null)
-            throw new FileException(FileErrorType.INVALID_ID,"No transactions were found");
         return accountBalanceResponseDTO;
     }
 

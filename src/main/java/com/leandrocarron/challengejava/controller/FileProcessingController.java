@@ -2,22 +2,23 @@ package com.leandrocarron.challengejava.controller;
 
 import com.leandrocarron.challengejava.config.DefaultApiResponses;
 import com.leandrocarron.challengejava.dto.ErrorDTO.ErrorResponseDTO;
-import com.leandrocarron.challengejava.dto.responseDTO.AccountBalanceResponseDTO;
 import com.leandrocarron.challengejava.dto.responseDTO.ProcessIdResponseDTO;
-import com.leandrocarron.challengejava.dto.responseDTO.ProcessResponseDTO;
-import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.exception.FileErrorType;
-import com.leandrocarron.challengejava.exception.FileUploadException;
+import com.leandrocarron.challengejava.exception.FileException;
 import com.leandrocarron.challengejava.model.FileProcess;
-import com.leandrocarron.challengejava.model.ProcessStatus;
 import com.leandrocarron.challengejava.service.FileProcessService;
 //logs
+import com.leandrocarron.challengejava.validation.annotation.CSVFile;
+import com.leandrocarron.challengejava.validation.annotation.MaxFileSize;
+import com.leandrocarron.challengejava.validation.annotation.NotEmptyFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
+import jdk.jfr.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 
 @Tag(name = "File Processing", description = "Operaciones de carga de datos")
 
@@ -45,7 +47,7 @@ public class FileProcessingController {
 
     //operations makes that swagger-ui schemes shows DataResponseErrorDTO like default
     @Operation(
-            summary = "Carga un archivo csv para procesarlo, convertirlo en transacciones y almacenarlas",
+            summary = "Carga un archivo csv headers para procesarlo, convertirlo en transacciones y almacenarlas",
             description = "Retorna el processingId generado",
             responses = {
                     @ApiResponse(responseCode = "202",description = "Requerimiento aceptado",
@@ -60,36 +62,20 @@ public class FileProcessingController {
     //parameters allows upload csv on swagger like string
     public ResponseEntity<ProcessIdResponseDTO> uploadCSV(@Parameter(description = "Archivo CSV", required = true,
             content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                    schema = @Schema(type = "string", format = "binary"))) @RequestParam("file") MultipartFile file) {
-        //verify if uploaded file. not csv or empty
-        if (file == null || file.isEmpty()) {
-            throw new FileUploadException(FileErrorType.EMPTY_FILE,"El archivo está vacío o no fue enviado");
-        }
-        if (!file.getOriginalFilename().endsWith(".csv")) {
-            throw new FileUploadException(FileErrorType.INVALID_CONTENT, "Archivo con extensión incorrecta. Se requiere csv");
-        }
-        //a FileProcess is created and returning. PENDING STATE
-        FileProcess process = fileProcessService.createFileProcess();
-        //this is how I get de porcessId that I need to send in the response
-        Long processId = process.getFileProcessId();
-        //Save file content in a temporary file to prevent issues
-        File tempFile;
-        try {
-            tempFile = File.createTempFile("upload-", ".csv");
-            file.transferTo(tempFile);
-            log.info(" processId {} - temporary copy of the file was created and save until the hole process ends");
-        } catch (IOException e) {
-            throw new FileUploadException( FileErrorType.IO_ERROR,"El archivo no pudo guardarse en disco");
-        }
-        //Now the content of the uploaded file is processed
-        ProcessStatus processStatus= ProcessStatus.FAILED;
-        process.setStatus(processStatus);
-        fileProcessService.saveProcess(process);
-        fileProcessService.processCSVAsync( tempFile, processId);
+                    schema = @Schema(type = "string", format = "binary"))) @RequestParam("file") @NotNull @NotEmptyFile @CSVFile @MaxFileSize(15*1024*1024) MultipartFile file) {
+
+        //new processing inicialization
+        FileProcess fileProcess = null;
+        File tempFile = null;
+        //The exceptions throwed by the following service functions work like a break. Async function will never be excecuted
+        fileProcess = fileProcessService.newProcessing();
+        tempFile = fileProcessService.createTemporaryFile(file, fileProcess);
+
+        fileProcessService.processCSVAsync( tempFile, fileProcess.getFileProcessId());
 
         return ResponseEntity
                 .accepted()
-                .body(new ProcessIdResponseDTO(processId));
+                .body(new ProcessIdResponseDTO(fileProcess.getFileProcessId()));
     }
 
 
